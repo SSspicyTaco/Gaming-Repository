@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catch the Falling Object Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        #gameCanvas {
+            border: 1px solid #000;
+            background-color: #87CEEB;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const player = {
+            x: canvas.width / 2 - 25,
+            y: canvas.height - 50,
+            width: 50,
+            height: 50,
+            color: 'blue',
+            speed: 10,
+            dx: 0
+        };
+
+        const fallingObject = {
+            x: Math.random() * (canvas.width - 20),
+            y: 0,
+            width: 20,
+            height: 20,
+            color: 'red',
+            speed: 3
+        };
+
+        let score = 0;
+
+        function drawPlayer() {
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+        }
+
+        function drawFallingObject() {
+            ctx.fillStyle = fallingObject.color;
+            ctx.fillRect(fallingObject.x, fallingObject.y, fallingObject.width, fallingObject.height);
+        }
+
+        function clear() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function newPos() {
+            player.x += player.dx;
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+        }
+
+        function moveFallingObject() {
+            fallingObject.y += fallingObject.speed;
+            if (fallingObject.y + fallingObject.height > canvas.height) {
+                fallingObject.y = 0;
+                fallingObject.x = Math.random() * (canvas.width - fallingObject.width);
+                score--;
+            }
+        }
+
+        function detectCollision() {
+            if (
+                player.x < fallingObject.x + fallingObject.width &&
+                player.x + player.width > fallingObject.x &&
+                player.y < fallingObject.y + fallingObject.height &&
+                player.y + player.height > fallingObject.y
+            ) {
+                score++;
+                fallingObject.y = 0;
+                fallingObject.x = Math.random() * (canvas.width - fallingObject.width);
+            }
+        }
+
+        function update() {
+            clear();
+            drawPlayer();
+            drawFallingObject();
+            newPos();
+            moveFallingObject();
+            detectCollision();
+            requestAnimationFrame(update);
+        }
+
+        function keyDown(e) {
+            if (e.key === 'ArrowRight' || e.key === 'Right') {
+                player.dx = player.speed;
+            } else if (e.key === 'ArrowLeft' || e.key === 'Left') {
+                player.dx = -player.speed;
+            }
+        }
+
+        function keyUp(e) {
+            if (e.key === 'ArrowRight' || e.key === 'Right' || e.key === 'ArrowLeft' || e.key === 'Left') {
+                player.dx = 0;
+            }
+        }
+
+        document.addEventListener('keydown', keyDown);
+        document.addEventListener('keyup', keyUp);
+
+        update();
+    </script>
+</body>
+</html>
